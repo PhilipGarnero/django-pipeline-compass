@@ -59,7 +59,11 @@ class CompassCompiler(CompilerBase):
         return open(path, 'w').write(smart_str(content))
 
     def is_outdated(self, infile, outfile):
-        return datetime.fromtimestamp(os.path.getmtime(infile)) > datetime.fromtimestamp(os.path.getmtime(outfile))
+        try:
+            return datetime.fromtimestamp(os.path.getmtime(infile)) > datetime.fromtimestamp(os.path.getmtime(outfile))
+        except OSError:
+            return True
+        # temporary solution, find a way with pyscss to do it
 
 
 compass_project_path = os.path.abspath(os.path.join(settings.PIPELINE_COMPASS_CONFIG_RB, os.pardir)) if settings.PIPELINE_COMPASS_CONFIG_RB else scss.config.PROJECT_ROOT
