@@ -15,7 +15,7 @@ setup(
     url='https://github.com/vbabiy/django-pipeline-compass',
     packages=find_packages(),
     zip_safe=False,
-    install_requires=['pyScss>=1.2.0'],
+    install_requires=['pyScss>=1.2.0', 'sass>=2.2'],
     include_package_data=True,
     classifiers=[
         'Environment :: Web Environment',

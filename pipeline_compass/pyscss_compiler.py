@@ -1,7 +1,6 @@
 from pipeline.compilers import CompilerBase
 from django.utils.encoding import smart_str
 from django.conf import settings
-
 from datetime import datetime
 import scss
 import os
@@ -33,7 +32,7 @@ def init_compiler():
         init_compiler.done = True
 
 
-class CompassCompiler(CompilerBase):
+class PyScssCompassCompiler(CompilerBase):
     output_extension = 'css'
 
     def match_file(self, filename):
@@ -41,16 +40,20 @@ class CompassCompiler(CompilerBase):
         return filename.endswith(('.scss', '.sass'))
 
     def output_path(self, filename):
+        global raw_path
         if css_path != compass_project_path:
-            return os.path.join(css_path, '.'.join((os.path.splitext(os.path.basename(filename))[0], self.output_extension)))
-        else:
-            filename = os.path.splitext(filename)
-            return '.'.join((filename[0], self.output_extension))
+            raw_path = os.path.join(css_path, '.'.join((os.path.splitext(os.path.basename(filename))[0], self.output_extension)))
+            for p in settings.STATICFILES_DIRS:
+                if raw_path.startswith(os.path.abspath(p)):
+                    return raw_path.replace(os.path.abspath(p), "", 1).lstrip('/')
+        filename = os.path.splitext(filename)
+        raw_path = '.'.join((filename[0], self.output_extension))
+        return raw_path
 
     def compile_file(self, infile, outfile, outdated=False, force=False):
         add_to_scss_path(os.path.dirname(infile))
         if force or outdated:
-            self.save_file(outfile, scss.Scss(scss_opts={
+            self.save_file(raw_path, scss.Scss(scss_opts={
                 'compress': False,
                 'debug_info': settings.DEBUG,
             }).compile(None, infile))
@@ -63,9 +66,9 @@ class CompassCompiler(CompilerBase):
             return datetime.fromtimestamp(os.path.getmtime(infile)) > datetime.fromtimestamp(os.path.getmtime(outfile))
         except OSError:
             return True
-        # temporary solution, find a way with pyscss to do it
 
 
 compass_project_path = os.path.abspath(os.path.join(settings.PIPELINE_COMPASS_CONFIG_RB, os.pardir)) if settings.PIPELINE_COMPASS_CONFIG_RB else scss.config.PROJECT_ROOT
+
 # add compass builtins to scss load path
 add_to_scss_path(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'pipeline_compass', 'compass'))
