@@ -11,8 +11,8 @@ And add it as a compiler to pipeline in your django `settings.py`.
 You can choose between official C libsass compiler (reliable) and pyScss module (lightweight)
 
 	PIPELINE_COMPILERS = (
- 		'pipeline_compass.libsass_compiler.LibSassCompassCompiler',
- 		'pipeline_compass.pyscss_compiler.PyScssCompassCompiler',
+ 		'pipeline_compass.compass_compiler.LibSassCompassCompiler',
+ 		'pipeline_compass.compass_compiler.PyScssCompassCompiler',
 	)
 
 Specify the path of the config.rb used by compass.  
