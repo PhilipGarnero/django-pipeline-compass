@@ -19,7 +19,7 @@ setup(
     extras_require = {
         'pyscss':  ['pyScss>=1.2.0'],
         'sass': ['sass>=2.3'],
-    }
+    },
     include_package_data=True,
     classifiers=[
         'Environment :: Web Environment',
