@@ -3,8 +3,6 @@ from django.utils.encoding import smart_str
 from django.conf import settings
 from datetime import datetime
 import os
-import sass
-import scss
 
 
 def get_attr_from_file(filename, attr):
@@ -54,30 +52,3 @@ class CompassCompiler(CompilerBase):
             return datetime.fromtimestamp(os.path.getmtime(infile)) > datetime.fromtimestamp(os.path.getmtime(outfile))
         except OSError:
             return True
-
-
-class LibSassCompassCompiler(CompassCompiler):
-    def compile_file(self, infile, outfile, outdated=False, force=False):
-        self.include_paths.append(os.path.dirname(infile))
-        if force or outdated:
-            self.save_file(self.raw_path, sass.compile_file(str(infile), ','.join(self.include_paths)))
-
-
-class PyScssCompassCompiler(CompassCompiler):
-    def compile_file(self, infile, outfile, outdated=False, force=False):
-        scss.config.STATIC_ROOT = self.images_path
-        scss.config.ASSETS_ROOT = self.generated_images_path if self.generated_images_path else scss.config.STATIC_ROOT
-
-        paths = self.include_paths + [os.path.dirname(infile)]
-        load_paths = scss.config.LOAD_PATHS.split(',')  # get all saved paths
-        for path in paths:
-            if path not in load_paths:
-                load_paths.append(path)
-                scss.config.LOAD_PATHS = ','.join(load_paths) # reconstruct saved paths
-
-        if force or outdated:
-            self.save_file(self.raw_path, scss.Scss(scss_opts={
-                'compress': False,
-                'style': "legacy",
-                'debug_info': False,
-            }).compile(None, infile))
